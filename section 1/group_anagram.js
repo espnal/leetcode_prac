@@ -10,7 +10,7 @@ const groupAnagrams = function(strs) {
             anagramMap.set(sortedWord, [word]);
         }
     }
-    
+    console.log(anagramMap)
     console.log(Array.from(anagramMap.values()));
 };
 groupAnagrams(["eat","tea","tan","ate","nat","bat"])
