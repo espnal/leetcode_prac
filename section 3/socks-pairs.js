@@ -1,5 +1,5 @@
 function sockMerchant(n, ar) {
-  const sockCount = ar.reduce((count, sockColor) => {
+    const sockCount = ar.reduce((count, sockColor) => {
         count[sockColor] = (count[sockColor] || 0) + 1;
         return count;
     }, {});
@@ -10,3 +10,4 @@ function sockMerchant(n, ar) {
 
 }
 console.log(sockMerchant(7, [1,2,1,4,3,2,5]))
+
