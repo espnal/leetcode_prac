@@ -1,47 +1,58 @@
 class TimeLimitedCache {
     constructor() {
-        this.cache = {}; // Object to store key-value pairs and expiration times
+      this.cache = {}; // Almacena los valores
+      this.expiration = {}; // Almacena los tiempos de expiración
     }
 
     set(key, value, duration) {
-        const currentTime = Date.now();
-        
-        // Check if the key exists and is not expired
-        if (this.cache[key] && this.cache[key].expiresAt > currentTime) {
-            // Update the value and reset the expiration time
-            this.cache[key] = {
-                value,
-                expiresAt: currentTime + duration
-            };
-            return true;
-        } else {
-            // Create a new key-value pair with expiration time
-            this.cache[key] = {
-                value,
-                expiresAt: currentTime + duration
-            };
-            return false;
-        }
-    }
+    const currentTime = Date.now();
+    const expiresAt = currentTime + duration;
 
-    get(key) {
-        const currentTime = Date.now();
-        if (this.cache[key] && this.cache[key].expiresAt > currentTime) {
-            return this.cache[key].value; // Return the value if the key is unexpired
-        } else {
-            return -1; // Key does not exist or has expired
-        }
-    }
-
-    count() {
-        const currentTime = Date.now();
-        // Count the unexpired keys
-        let count = 0;
-        for (const key in this.cache) {
-            if (this.cache[key].expiresAt > currentTime) {
-                count++;
-            }
-        }
-        return count;
-    }
+      // Si el tiempo de expiración ya pasó, simplemente actualiza los valores
+    if (this.expiration[key] && this.expiration[key] <= currentTime) {
+        this.cache[key] = value;
+        this.expiration[key] = expiresAt;
+        return false;
 }
+  
+      // Establece el valor y el tiempo de expiración
+      this.cache[key] = value;
+      this.expiration[key] = expiresAt;
+      return true;
+    }
+  
+    get(key) {
+      const currentTime = Date.now();
+      if (this.expiration[key] && this.expiration[key] > currentTime) {
+        return this.cache[key]; // Devuelve el valor si la clave no ha expirado
+      } else {
+        // Elimina la clave y su tiempo de expiración
+        delete this.cache[key];
+        delete this.expiration[key];
+        return -1;
+      }
+    }
+  
+    count() {
+      const currentTime = Date.now();
+      let count = 0;
+      for (const key in this.expiration) {
+        if (this.expiration[key] > currentTime) {
+          count++;
+        } else {
+          // Si el tiempo de expiración pasó, elimina la clave y su tiempo de expiración
+          delete this.cache[key];
+          delete this.expiration[key];
+        }
+      }
+      return count;
+    }
+  }
+  
+  // Ejemplo de uso:
+  const cache = new TimeLimitedCache();
+  cache.set(1, 'Value 1', 5000); // Expira en 5 segundos
+  cache.set(2, 'Value 2', 10000); // Expira en 10 segundos
+  console.log(cache.get(1)); // 'Value 1' (sin expirar)
+  console.log(cache.count()); // 2 (dos claves sin expirar)
+  
